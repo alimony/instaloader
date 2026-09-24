@@ -1154,7 +1154,9 @@ class Profile:
         else:
             raise InvalidArgumentException("Either username or user_id must be given.")
         try:
-            feed = context.get_json(path, params={"count": 12})
+            # Only one attempt, as for web_profile_info (see _resolve_node): when Instagram
+            # refuses this endpoint too, the profile page fallback is cheaper than retries.
+            feed = context.get_json(path, params={"count": 12}, _attempt=context.max_connection_attempts)
         except (QueryReturnedBadRequestException, ConnectionException, AbortDownloadException) as err:
             # Includes QueryReturnedNotFoundException and TooManyRequestsException. The
             # caller decides how to report the failure of the endpoint it tried first.

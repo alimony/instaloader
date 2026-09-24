@@ -449,6 +449,11 @@ class InstaloaderContext:
                 ))
             while resp.is_redirect:
                 redirect_url = resp.headers['location']
+                if redirect_url == 'https://{}/'.format(host):
+                    # Instagram refuses some requests by redirecting them to its home page, which
+                    # is not JSON. Report the refusal instead of loading the page.
+                    raise ConnectionException("Redirected to the home page when accessing https://{}/{}"
+                                              .format(host, path))
                 self.log('\nHTTP redirect from https://{0}/{1} to {2}'.format(host, path, redirect_url))
                 if (redirect_url.startswith('https://www.instagram.com/accounts/login') or
                     redirect_url.startswith('https://i.instagram.com/accounts/login')):
